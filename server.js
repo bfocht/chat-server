@@ -1,8 +1,10 @@
 var http = require('http');
 var sockjs = require('sockjs');
+var Filter = require('bad-words');
 
 var echo = sockjs.createServer({ sockjs_url: '' });
 var clients = {};
+var filter = new Filter();
 
 // Broadcast to all clients
 function broadcast(message){
@@ -18,8 +20,7 @@ echo.on('connection', function(conn) {
     console.log("connect: " + conn.id);
     clients[conn.id] = conn;
     conn.on('data', function(message) {
-        console.log(message)
-        broadcast(message);
+        broadcast(filter.clean(message));
     });
     // on connection close event
     conn.on('close', function() {
